@@ -1,3 +1,5 @@
+let RESULT_OBJECT = {}
+
 window.onload = _ => {
     let reader = new FileReader()
     document.getElementById('htmlFile').addEventListener('change', event => {
@@ -6,13 +8,13 @@ window.onload = _ => {
         const file = files[0]
         const fileName = file.name
         if (!/\.html?$/.test(fileName)) return alert('HTMLファイルを選択してください')
-        if (/^\d+$/.test(chart.id)) chart.destroy()
         reader.readAsText(file, 'UTF-8')
         reader.onload = () => {
             const parser = new DOMParser()
             const newDocument = parser.parseFromString(reader.result, "text/html")
             const resultObj = getResultObj(newDocument)
-            createListTab(resultObj)
+            RESULT_OBJECT = resultObj
+            createListTab()
             createChart(resultObj['全体']['result'])
         }
     })
@@ -42,19 +44,38 @@ const getResultObj = newDocument => {
     return resultObj
 }
 
-const createListTab = obj => {
+const createListTab = _ => {
     document.getElementById('list').innerHTML = ''
     let html = ''
-    for (const name in obj) {
+    for (const name in RESULT_OBJECT) {
         if (!/全体/.test(name)) {
             html += `<li class="nav-item" id="tab-${name}"><span class="nav-link">${name}</span></li>`
-            createList(name, obj[name])
+            createList(name, RESULT_OBJECT[name])
         }
     }
     document.getElementById('tab').innerHTML = html
+    document.querySelectorAll('.nav-item').forEach(t => {
+        t.removeEventListener('click', tabChange, false)
+        t.addEventListener('click', tabChange, false)
+    })
+    document.querySelector('.nav-link').classList.add('active') // 全体をアクティブに変更
+}
+
+const tabChange = e => {
+    createChart(RESULT_OBJECT[e.target.textContent]['result'])
+    // タブのアクティブを切り替え
+    document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'))
+    e.target.classList.add('active')
+    // 結果一覧のアクティブを切り替え
+    document.querySelectorAll('[id^=list-]').forEach(t => {
+        t.classList.add('d-none')
+        if (t.getAttribute('id') === `list-${e.target.textContent}`) t.classList.remove('d-none')
+        if (e.target.textContent === '全体') t.classList.remove('d-none')
+    })
 }
 
 const createChart = ary => {
+    if (/^\d+$/.test(chart.id)) chart.destroy()
     const ctx = document.getElementById('chart').getContext('2d')
     const opt = JSON.parse(JSON.stringify(OPTION))
     for (let i = 0; i < ary.length; i++) opt.data.labels[i] = `${opt.data.labels[i]}（${ary[i]}回）`
@@ -65,7 +86,7 @@ const createChart = ary => {
 const createList = (name, obj) => {
     console.log(name, obj)
     let html = `<h3>${name}</h3>`
-    for (let i = 0; i < obj['log'].length; i++) 
+    for (let i = 0; i < obj['log'].length; i++)
         html += `<li class="list-group-item">${obj['log'][i]}</li>`
     const elm = document.createElement('div')
     elm.innerHTML = html
