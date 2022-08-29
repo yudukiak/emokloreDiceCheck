@@ -103,6 +103,6 @@ body {
     border-top: 0.05rem solid #e5e5e5;
 }
 
-th::after {
-	content: "回";
+.nav-item {
+    cursor: pointer;
 }

@@ -46,32 +46,66 @@ const getResultObj = newDocument => {
 
 const createListTab = _ => {
     document.getElementById('list').innerHTML = ''
-    let html = ''
+    let tabHtml = '<li class="nav-item" id="tab-全体"> <span class="nav-link active">全体</span> </li>'
+    let switchHtml = '<div class="col-6 col-lg-3 col-xxl-2"> <div class="form-check form-switch"> <input class="form-check-input" type="checkbox" id="switch-全体" checked disabled> <label class="form-check-label" for="switch-全体">全体</label> </div> </div>'
     for (const name in RESULT_OBJECT) {
         if (!/全体/.test(name)) {
-            html += `<li class="nav-item" id="tab-${name}"><span class="nav-link">${name}</span></li>`
+            tabHtml += `<li class="nav-item" id="tab-${name}"><span class="nav-link">${name}</span></li>`
+            switchHtml += `<div class="col-6 col-lg-3 col-xxl-2"> <div class="form-check form-switch"> <input class="form-check-input" type="checkbox" id="switch-${name}" checked> <label class="form-check-label" for="switch-${name}">${name}</label> </div> </div>`
             createList(name, RESULT_OBJECT[name])
         }
     }
-    document.getElementById('tab').innerHTML = html
+    document.getElementById('tab').innerHTML = tabHtml
     document.querySelectorAll('.nav-item').forEach(t => {
         t.removeEventListener('click', tabChange, false)
         t.addEventListener('click', tabChange, false)
     })
-    document.querySelector('.nav-link').classList.add('active') // 全体をアクティブに変更
+    document.getElementById('switch').innerHTML = switchHtml
+    document.querySelectorAll('.form-switch input').forEach(t => {
+        t.removeEventListener('change', switchChange, false)
+        t.addEventListener('change', switchChange, false)
+    })
 }
 
 const tabChange = e => {
-    createChart(RESULT_OBJECT[e.target.textContent]['result'])
+    const name = e.target.textContent
+    createChart(RESULT_OBJECT[name]['result'])
     // タブのアクティブを切り替え
     document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'))
-    e.target.classList.add('active')
-    // 結果一覧のアクティブを切り替え
-    document.querySelectorAll('[id^=list-]').forEach(t => {
-        t.classList.add('d-none')
-        if (t.getAttribute('id') === `list-${e.target.textContent}`) t.classList.remove('d-none')
-        if (e.target.textContent === '全体') t.classList.remove('d-none')
+    document.getElementById(`tab-${name}`).firstElementChild.classList.add('active')
+    listChange(name)
+}
+
+const switchChange = e => {
+    const name = e.target.getAttribute('id').replace(/^switch-/, '')
+    document.getElementById(`tab-${name}`).classList.toggle('d-none')
+    const activeName = document.querySelector('.nav-link.active').textContent
+    const result = RESULT_OBJECT['全体']['result']
+    if (document.getElementById(`tab-${name}`).classList.contains('d-none')) {
+        for (let i = 0; i < 7; i++) result[i] = result[i] - RESULT_OBJECT[name]['result'][i]
+        // アクティブなタブがOFFになったら全体に切り替える
+        if (activeName === name) {
+            document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'))
+            document.querySelector('#tab-全体 .nav-link').classList.add('active')
+            createChart(result)
+        } else {
+            createChart(RESULT_OBJECT[activeName]['result'])
+        }
+    } else {
+        for (let i = 0; i < 7; i++) result[i] = result[i] + RESULT_OBJECT[name]['result'][i]
+        createChart(RESULT_OBJECT[activeName]['result'])
+    }
+    listChange(activeName)
+}
+
+const listChange = activeName => {
+    document.querySelectorAll('[id^=list-]').forEach(t => t.classList.add('d-none'))
+    document.querySelectorAll('[id^=switch-]:checked').forEach(t => {
+        const name = t.getAttribute('id').replace(/^switch-/, '')
+        if (/全体/.test(name)) return
+        if (/全体/.test(activeName)) document.getElementById(`list-${name}`).classList.remove('d-none')
     })
+    if (!/全体/.test(activeName)) document.getElementById(`list-${activeName}`).classList.remove('d-none')
 }
 
 const createChart = ary => {
@@ -84,7 +118,7 @@ const createChart = ary => {
 }
 
 const createList = (name, obj) => {
-    console.log(name, obj)
+    //console.log(name, obj)
     let html = `<h3>${name}</h3>`
     for (let i = 0; i < obj['log'].length; i++)
         html += `<li class="list-group-item">${obj['log'][i]}</li>`
