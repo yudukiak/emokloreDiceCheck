@@ -33,13 +33,13 @@ const getResultObj = newDocument => {
         if (!/DM<=/.test(cmd)) continue // エモクロアのコマンド以外は処理しない
         if (resultObj[name] == null) resultObj[name] = JSON.parse(JSON.stringify(RESULT))
         resultObj[name]['log'].push(cmd)
-        if (/ファンブル!$/.test(cmd)) resultObj[name]['result'][0] += 1, resultObj['全体']['result'][0] += 1
-        if (/失敗!$/.test(cmd)) resultObj[name]['result'][1] += 1, resultObj['全体']['result'][1] += 1
-        if (/成功!$/.test(cmd)) resultObj[name]['result'][2] += 1, resultObj['全体']['result'][2] += 1
-        if (/ダブル!$/.test(cmd)) resultObj[name]['result'][3] += 1, resultObj['全体']['result'][3] += 1
-        if (/トリプル!$/.test(cmd)) resultObj[name]['result'][4] += 1, resultObj['全体']['result'][4] += 1
-        if (/ミラクル!$/.test(cmd)) resultObj[name]['result'][5] += 1, resultObj['全体']['result'][5] += 1
-        if (/カタストロフ!$/.test(cmd)) resultObj[name]['result'][6] += 1, resultObj['全体']['result'][6] += 1
+        if (/ファンブル!?$/.test(cmd)) resultObj[name]['result'][0] += 1, resultObj['全体']['result'][0] += 1
+        if (/失敗!?$/.test(cmd)) resultObj[name]['result'][1] += 1, resultObj['全体']['result'][1] += 1
+        if (/成功!?$/.test(cmd)) resultObj[name]['result'][2] += 1, resultObj['全体']['result'][2] += 1
+        if (/ダブル!?$/.test(cmd)) resultObj[name]['result'][3] += 1, resultObj['全体']['result'][3] += 1
+        if (/トリプル!?$/.test(cmd)) resultObj[name]['result'][4] += 1, resultObj['全体']['result'][4] += 1
+        if (/ミラクル!?$/.test(cmd)) resultObj[name]['result'][5] += 1, resultObj['全体']['result'][5] += 1
+        if (/カタストロフ!?$/.test(cmd)) resultObj[name]['result'][6] += 1, resultObj['全体']['result'][6] += 1
     }
     return resultObj
 }
