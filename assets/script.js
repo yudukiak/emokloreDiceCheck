@@ -29,7 +29,7 @@ const getResultObj = newDocument => {
         let name = element.children[1].textContent.trim()
         const cmd = element.children[2].textContent.trim()
         if (name === '') name = '（空欄）'
-        if (!/メイン/.test(tab)) continue // メインタブ以外は処理しない
+        if (!/メイン|main/.test(tab)) continue // メインタブ以外は処理しない
         if (!/DM<=/.test(cmd)) continue // エモクロアのコマンド以外は処理しない
         if (resultObj[name] == null) resultObj[name] = JSON.parse(JSON.stringify(RESULT))
         resultObj[name]['log'].push(cmd)
